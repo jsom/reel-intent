@@ -82,6 +82,7 @@ export async function fetchRandomMovie(
   genreId: number | null,
   language: string | null,
   period: TimePeriod | null,
+  minStars: number,  // 0–5; converted to TMDB's 0–10 scale
 ): Promise<Movie | null> {
   const params: Record<string, string> = {
     sort_by: 'vote_count.desc',
@@ -94,6 +95,7 @@ export async function fetchRandomMovie(
     params['primary_release_date.gte'] = `${period.from}-01-01`
     params['primary_release_date.lte'] = `${period.to}-12-31`
   }
+  if (minStars > 0) params['vote_average.gte'] = String(minStars * 2)
 
   const first = await tmdb<{ results: Movie[]; total_pages: number }>(
     '/discover/movie',
