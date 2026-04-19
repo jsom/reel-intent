@@ -594,6 +594,18 @@
   margin: 0;
 }
 
+/* ─── Small Pool Warning ────────────────────────────────────── */
+
+.pool-warning {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: #eab308;
+  text-align: center;
+  opacity: 0.75;
+  margin: -0.5rem 0 1rem;
+  letter-spacing: 0.03em;
+}
+
 /* ─── Error / Empty State ───────────────────────────────────── */
 
 .oracle-error {

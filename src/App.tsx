@@ -12,7 +12,7 @@ import {
 
 type AppPhase = 'idle' | 'loading' | 'revealed' | 'error' | 'empty'
 
-const ANIMATION_MS = 3200 // shake (1600ms) + flip (1100ms) + buffer
+const ANIMATION_MS = 3200
 
 export default function App() {
   const [genres, setGenres] = useState<Genre[]>([])
@@ -25,13 +25,12 @@ export default function App() {
   const [ballPhase, setBallPhase] = useState<BallPhase>('idle')
   const [movie, setMovie] = useState<Movie | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
+  const [poolSize, setPoolSize] = useState<number | null>(null)
 
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    fetchGenres().then(setGenres).catch(() => {
-      // silently fail — genres list degrades to empty
-    })
+    fetchGenres().then(setGenres).catch(() => {})
   }, [])
 
   async function consultOracle() {
@@ -42,10 +41,10 @@ export default function App() {
 
     setMovie(null)
     setErrorMsg('')
+    setPoolSize(null)
     setAppPhase('loading')
     setBallPhase('shaking')
 
-    // After shake finishes, flip the ball
     const flipTimer = setTimeout(() => setBallPhase('flipping'), 1600)
 
     try {
@@ -56,13 +55,16 @@ export default function App() {
 
       clearTimeout(flipTimer)
 
-      if (!result) {
+      const { movie: picked, totalResults } = result as Awaited<ReturnType<typeof fetchRandomMovie>>
+      setPoolSize(totalResults)
+
+      if (!picked) {
         setBallPhase('idle')
         setAppPhase('empty')
         return
       }
 
-      setMovie(result)
+      setMovie(picked)
       setBallPhase('revealed')
       setAppPhase('revealed')
     } catch {
@@ -77,6 +79,7 @@ export default function App() {
     abortRef.current?.abort()
     setMovie(null)
     setErrorMsg('')
+    setPoolSize(null)
     setAppPhase('idle')
     setBallPhase('idle')
   }
@@ -84,6 +87,7 @@ export default function App() {
   const movieTitle = movie?.title ?? ''
   const movieYear = movie?.release_date?.slice(0, 4) ?? ''
   const isLoading = appPhase === 'loading'
+  const tinyPool = poolSize !== null && poolSize > 0 && poolSize < 20
 
   return (
     <div className="app">
@@ -136,6 +140,13 @@ export default function App() {
         movieYear={movieYear}
       />
 
+      {/* ── Small pool warning ── */}
+      {tinyPool && appPhase === 'revealed' && (
+        <p className="pool-warning">
+          ⚠ Only {poolSize} film{poolSize === 1 ? '' : 's'} matched — loosen your filters for more variety
+        </p>
+      )}
+
       {/* ── Error / empty states ── */}
       {appPhase === 'error' && (
         <p className="oracle-error">{errorMsg}</p>
@@ -146,7 +157,7 @@ export default function App() {
         </p>
       )}
 
-      {/* ── Consult button (hidden when revealed) ── */}
+      {/* ── Consult button ── */}
       {appPhase !== 'revealed' && (
         <button
           className="oracle-btn"

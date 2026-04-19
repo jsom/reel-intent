@@ -19,6 +19,7 @@ export interface Movie {
   vote_count: number
   original_language: string
   genre_ids: number[]
+  total_results?: number
 }
 
 export interface TimePeriod {
@@ -78,15 +79,25 @@ export async function fetchGenres(): Promise<Genre[]> {
   return data.genres
 }
 
+export interface FetchResult {
+  movie: Movie | null
+  totalResults: number
+}
+
 export async function fetchRandomMovie(
   genreId: number | null,
   language: string | null,
   period: TimePeriod | null,
-  minStars: number,  // 0–5; converted to TMDB's 0–10 scale
-): Promise<Movie | null> {
+  minStars: number,
+): Promise<FetchResult> {
+  // When vote_average.gte is already a quality signal, relax vote_count.gte
+  // so we don't collapse the pool. A film rated 8/10 by 50 people is more
+  // trustworthy than one rated 6/10 by 50 people.
+  const voteFloor = minStars >= 4 ? 50 : minStars >= 2 ? 100 : 200
+
   const params: Record<string, string> = {
     sort_by: 'vote_count.desc',
-    'vote_count.gte': '200',  // higher floor keeps quality up across the full page range
+    'vote_count.gte': String(voteFloor),
     include_adult: 'false',
   }
   if (genreId) params.with_genres = String(genreId)
@@ -97,15 +108,14 @@ export async function fetchRandomMovie(
   }
   if (minStars > 0) params['vote_average.gte'] = String(minStars * 2)
 
-  const first = await tmdb<{ results: Movie[]; total_pages: number }>(
+  const first = await tmdb<{ results: Movie[]; total_pages: number; total_results: number }>(
     '/discover/movie',
     { ...params, page: '1' },
   )
-  if (!first.results.length) return null
 
-  // TMDB caps at 500 pages. Using the full range means ~10 000 eligible films
-  // rather than the previous 1 000, so popular titles like Lock Stock no longer
-  // dominate repeated picks.
+  const totalResults = first.total_results ?? 0
+  if (!first.results.length) return { movie: null, totalResults }
+
   const maxPage = Math.min(first.total_pages, 500)
   const randomPage = Math.floor(Math.random() * maxPage) + 1
 
@@ -117,12 +127,10 @@ export async function fetchRandomMovie(
           page: String(randomPage),
         })
 
-  if (!page.results.length) return null
+  if (!page.results.length) return { movie: null, totalResults }
 
-  // Shuffle the page results before picking so we aren't always biased
-  // toward the first item in TMDB's deterministic page ordering.
   const shuffled = [...page.results].sort(() => Math.random() - 0.5)
-  return shuffled[0]
+  return { movie: shuffled[0], totalResults }
 }
 
 export function posterUrl(path: string): string {
