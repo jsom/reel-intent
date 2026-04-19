@@ -19,6 +19,7 @@ export default function App() {
   const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null)
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod | null>(null)
+  const [minStars, setMinStars] = useState(0)
 
   const [appPhase, setAppPhase] = useState<AppPhase>('idle')
   const [ballPhase, setBallPhase] = useState<BallPhase>('idle')
@@ -49,7 +50,7 @@ export default function App() {
 
     try {
       const [result] = await Promise.all([
-        fetchRandomMovie(selectedGenreId, selectedLanguage, selectedPeriod),
+        fetchRandomMovie(selectedGenreId, selectedLanguage, selectedPeriod, minStars),
         new Promise((r) => setTimeout(r, ANIMATION_MS)),
       ])
 
@@ -78,6 +79,7 @@ export default function App() {
     setErrorMsg('')
     setAppPhase('idle')
     setBallPhase('idle')
+    setMinStars(0)
   }
 
   const movieTitle = movie?.title ?? ''
@@ -119,9 +121,11 @@ export default function App() {
           selectedGenreId={selectedGenreId}
           selectedLanguage={selectedLanguage}
           selectedPeriod={selectedPeriod}
+          minStars={minStars}
           onGenreChange={setSelectedGenreId}
           onLanguageChange={setSelectedLanguage}
           onPeriodChange={setSelectedPeriod}
+          onMinStarsChange={setMinStars}
           disabled={isLoading}
         />
       </div>

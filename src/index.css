@@ -178,6 +178,72 @@
   color: #e2e8f0;
 }
 
+/* ─── Min-Stars Selector ────────────────────────────────────── */
+
+.stars-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 160px;
+}
+
+.stars-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0.45rem 0.6rem;
+  background: #0c0b18;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stars-row:hover {
+  border-color: rgba(168, 85, 247, 0.8);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.3), 0 0 16px rgba(168, 85, 247, 0.2);
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 0.1s;
+  color: #334155;
+}
+
+.star-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.star-btn:not(:disabled):hover {
+  transform: scale(1.2);
+}
+
+.star-btn.active {
+  color: #eab308;
+  text-shadow: 0 0 8px rgba(234, 179, 8, 0.7);
+}
+
+.stars-clear {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(139, 92, 246, 0.5);
+  background: none;
+  border: none;
+  padding: 0 0 0 4px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.stars-clear:hover:not(:disabled) {
+  color: #a855f7;
+}
+
 /* ─── Oracle Button ─────────────────────────────────────────── */
 
 .oracle-btn {
@@ -274,75 +340,39 @@
   border-radius: 50%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  overflow: hidden; /* clips the upscaled canvas to the circle */
 }
 
-/* Front — black sphere with purple glow */
+/* Front — purple glow; canvas provides the surface */
 .ball-front {
-  background: radial-gradient(circle at 36% 32%, #221840 0%, #0a0614 52%, #000000 100%);
   box-shadow:
     0 0 0 3px rgba(139, 92, 246, 0.25),
     0 0 35px rgba(139, 92, 246, 0.5),
     0 0 90px rgba(139, 92, 246, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.7),
-    inset 0 0 50px rgba(0, 0, 0, 0.6);
+    0 8px 32px rgba(0, 0, 0, 0.7);
 }
 
-/* Back — dark blue sphere glow */
+/* Back — blue glow; canvas provides the surface */
 .ball-back {
   transform: rotateY(180deg);
-  background: radial-gradient(circle at 64% 32%, #0e1f3d 0%, #040e20 52%, #000000 100%);
   box-shadow:
     0 0 0 3px rgba(59, 130, 246, 0.3),
     0 0 35px rgba(59, 130, 246, 0.55),
     0 0 90px rgba(59, 130, 246, 0.22),
-    0 8px 32px rgba(0, 0, 0, 0.7),
-    inset 0 0 50px rgba(0, 0, 0, 0.6);
+    0 8px 32px rgba(0, 0, 0, 0.7);
 }
 
-/* Specular highlight — gives the sphere 3D depth */
-.ball-highlight {
+/* The pixel-art canvas — drawn at 40×40, CSS stretches to 280×280.
+   image-rendering: pixelated prevents blurring on upscale, giving
+   each canvas pixel a crisp 7×7 block on screen. */
+.ball-canvas {
   position: absolute;
-  top: 14%;
-  left: 18%;
-  width: 38%;
-  height: 28%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 40% 35%,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.04) 45%,
-    transparent 75%
-  );
-  pointer-events: none;
-}
-
-.ball-highlight-back {
-  left: auto;
-  right: 18%;
-}
-
-/* The white "8" circle on the front */
-.ball-eight-circle {
-  position: absolute;
-  width: 44%;
-  height: 44%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 38%, #ffffff 0%, #d4d4d4 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-.ball-eight-text {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 2.6rem;
-  color: #0f0f1a;
-  line-height: 1;
-  user-select: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges; /* Firefox */
+  display: block;
 }
 
 /* The blue answer window on the back */

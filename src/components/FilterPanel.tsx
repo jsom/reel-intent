@@ -5,9 +5,11 @@ interface FilterPanelProps {
   selectedGenreId: number | null
   selectedLanguage: string | null
   selectedPeriod: TimePeriod | null
+  minStars: number
   onGenreChange: (id: number | null) => void
   onLanguageChange: (code: string | null) => void
   onPeriodChange: (period: TimePeriod | null) => void
+  onMinStarsChange: (stars: number) => void
   disabled: boolean
 }
 
@@ -16,9 +18,11 @@ export default function FilterPanel({
   selectedGenreId,
   selectedLanguage,
   selectedPeriod,
+  minStars,
   onGenreChange,
   onLanguageChange,
   onPeriodChange,
+  onMinStarsChange,
   disabled,
 }: FilterPanelProps) {
   return (
@@ -67,6 +71,34 @@ export default function FilterPanel({
           </option>
         ))}
       </FilterSelect>
+
+      {/* Min-stars filter */}
+      <div className="stars-selector">
+        <label className="filter-label">Min. Rating</label>
+        <div className="stars-row">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              className={['star-btn', star <= minStars ? 'active' : ''].join(' ')}
+              onClick={() => onMinStarsChange(star === minStars ? 0 : star)}
+              disabled={disabled}
+              title={`${star} star${star > 1 ? 's' : ''} minimum`}
+            >
+              ★
+            </button>
+          ))}
+          {minStars > 0 && (
+            <button
+              className="stars-clear"
+              onClick={() => onMinStarsChange(0)}
+              disabled={disabled}
+              title="Clear rating filter"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
