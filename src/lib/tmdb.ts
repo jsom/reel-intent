@@ -86,7 +86,7 @@ export async function fetchRandomMovie(
 ): Promise<Movie | null> {
   const params: Record<string, string> = {
     sort_by: 'vote_count.desc',
-    'vote_count.gte': '50',
+    'vote_count.gte': '200',  // higher floor keeps quality up across the full page range
     include_adult: 'false',
   }
   if (genreId) params.with_genres = String(genreId)
@@ -103,7 +103,10 @@ export async function fetchRandomMovie(
   )
   if (!first.results.length) return null
 
-  const maxPage = Math.min(first.total_pages, 50)
+  // TMDB caps at 500 pages. Using the full range means ~10 000 eligible films
+  // rather than the previous 1 000, so popular titles like Lock Stock no longer
+  // dominate repeated picks.
+  const maxPage = Math.min(first.total_pages, 500)
   const randomPage = Math.floor(Math.random() * maxPage) + 1
 
   const page =
@@ -115,7 +118,11 @@ export async function fetchRandomMovie(
         })
 
   if (!page.results.length) return null
-  return page.results[Math.floor(Math.random() * page.results.length)]
+
+  // Shuffle the page results before picking so we aren't always biased
+  // toward the first item in TMDB's deterministic page ordering.
+  const shuffled = [...page.results].sort(() => Math.random() - 0.5)
+  return shuffled[0]
 }
 
 export function posterUrl(path: string): string {
