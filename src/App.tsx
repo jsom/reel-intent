@@ -79,7 +79,6 @@ export default function App() {
     setErrorMsg('')
     setAppPhase('idle')
     setBallPhase('idle')
-    setMinStars(0)
   }
 
   const movieTitle = movie?.title ?? ''
@@ -100,8 +99,8 @@ export default function App() {
           ))}
         </div>
 
-        <h1 className="title-main">REEL INTENT</h1>
-        <p className="title-sub">The Movie Oracle</p>
+        <h1 className="title-main">TEENAH'S MOVIE TIME</h1>
+        <p className="title-sub">Let Fate Decide</p>
 
         <div className="title-filmstrip" style={{ transform: 'scaleX(-1)' }}>
           {Array.from({ length: 4 }).map((_, i) => (
