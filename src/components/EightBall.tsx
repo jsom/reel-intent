@@ -9,10 +9,37 @@ interface EightBallProps {
   onClick?: () => void
 }
 
-// Canvas drawn at this size, displayed at 280×280.
-// 56 → 5× scale (280÷56=5px per canvas pixel).
-// Was 40 → 7× which was too chunky; 56 gives ~25% smaller blocks.
+// Ball canvas: 56×56 displayed at 280×280 (5× scale).
 const S = 56
+
+// Glow canvas: 64×64 displayed at 320×320 (same 5× scale).
+// The 4 extra canvas pixels on each side hold the glow rings.
+// Drawing arcs at this resolution then upscaling with image-rendering:pixelated
+// produces stairstepped pixel-art rings — circular but grid-quantised.
+const GLOW_S = 64
+
+function drawGlow(canvas: HTMLCanvasElement, isBlue: boolean) {
+  const ctx = canvas.getContext('2d')!
+  ctx.clearRect(0, 0, GLOW_S, GLOW_S)
+  const cx = GLOW_S / 2, cy = GLOW_S / 2
+  // Ball radius in the 56-wide ball canvas is 27; scale to GLOW_S.
+  const ballR = 27 * (GLOW_S / 56)
+  const rgb = isBlue ? '59, 130, 246' : '139, 92, 246'
+  // Four 1-canvas-pixel-wide rings = four 5px-wide rings on screen.
+  const rings = [
+    { dr: 1, a: 0.72 },
+    { dr: 2, a: 0.40 },
+    { dr: 3, a: 0.18 },
+    { dr: 4, a: 0.06 },
+  ]
+  for (const { dr, a } of rings) {
+    ctx.strokeStyle = `rgba(${rgb}, ${a})`
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.arc(cx, cy, ballR + dr, 0, Math.PI * 2)
+    ctx.stroke()
+  }
+}
 
 function fill(ctx: CanvasRenderingContext2D, color: string, cx: number, cy: number, r: number) {
   ctx.fillStyle = color
@@ -86,14 +113,23 @@ function drawBack(canvas: HTMLCanvasElement) {
 
 export default function EightBall({ phase, movieTitle, movieYear, onClick }: EightBallProps) {
   const frontRef = useRef<HTMLCanvasElement>(null)
-  const backRef = useRef<HTMLCanvasElement>(null)
+  const backRef  = useRef<HTMLCanvasElement>(null)
+  const glowRef  = useRef<HTMLCanvasElement>(null)
   const [displayedTitle, setDisplayedTitle] = useState('')
   const [showYear, setShowYear] = useState(false)
 
   useEffect(() => {
     if (frontRef.current) drawFront(frontRef.current)
-    if (backRef.current) drawBack(backRef.current)
+    if (backRef.current)  drawBack(backRef.current)
   }, [])
+
+  // Redraw the glow whenever phase changes so purple ↔ blue tracks the flip.
+  useEffect(() => {
+    if (glowRef.current) {
+      const isBlue = phase === 'flipping' || phase === 'revealed'
+      drawGlow(glowRef.current, isBlue)
+    }
+  }, [phase])
 
   useEffect(() => {
     if (phase !== 'revealed') {
@@ -120,15 +156,15 @@ export default function EightBall({ phase, movieTitle, movieYear, onClick }: Eig
   const isIdle    = phase === 'idle'
   const isFlipped = phase === 'flipping' || phase === 'revealed'
 
-  const glowClass = isFlipped ? 'ball-pixel-glow glow-blue' : 'ball-pixel-glow glow-purple'
-
   return (
     <div
       className={['ball-scene', isIdle && onClick ? 'ball-clickable' : ''].join(' ')}
       onClick={isIdle ? onClick : undefined}
     >
-      {/* Square glow div — no border-radius so box-shadows form X/Y-axis-aligned square rings */}
-      <div className={glowClass} />
+      {/* Glow canvas — 64×64 drawn at canvas resolution, displayed at 320×320.
+          Arcs at low res upscale to stairstepped pixel-art rings (circular but
+          grid-quantised), centered over the 280px ball. */}
+      <canvas ref={glowRef} width={GLOW_S} height={GLOW_S} className="ball-glow-canvas" />
 
       <div className={['ball-wrapper', isIdle ? 'ball-floating' : '', phase === 'shaking' ? 'ball-shaking' : ''].join(' ')}>
         <div className={['ball-body', isFlipped ? 'ball-flipped' : ''].join(' ')}>
