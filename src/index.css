@@ -343,23 +343,26 @@
   overflow: hidden; /* clips the upscaled canvas to the circle */
 }
 
-/* Front — purple glow; canvas provides the surface */
+/* Front — pixelated purple glow: discrete 5px rings (= 1 canvas pixel at 5× scale),
+   no blur so they stay hard-edged like a pixel-art sprite aura. */
 .ball-front {
   box-shadow:
-    0 0 0 3px rgba(139, 92, 246, 0.25),
-    0 0 35px rgba(139, 92, 246, 0.5),
-    0 0 90px rgba(139, 92, 246, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.7);
+    0 0 0  5px rgba(139,  92, 246, 0.70),
+    0 0 0 10px rgba(109,  40, 217, 0.42),
+    0 0 0 15px rgba( 91,  33, 182, 0.20),
+    0 0 0 20px rgba( 76,  29, 149, 0.09),
+    0 0 0 25px rgba( 76,  29, 149, 0.03);
 }
 
-/* Back — blue glow; canvas provides the surface */
+/* Back — pixelated blue glow, same approach */
 .ball-back {
   transform: rotateY(180deg);
   box-shadow:
-    0 0 0 3px rgba(59, 130, 246, 0.3),
-    0 0 35px rgba(59, 130, 246, 0.55),
-    0 0 90px rgba(59, 130, 246, 0.22),
-    0 8px 32px rgba(0, 0, 0, 0.7);
+    0 0 0  5px rgba( 59, 130, 246, 0.70),
+    0 0 0 10px rgba( 37,  99, 235, 0.42),
+    0 0 0 15px rgba( 29,  78, 216, 0.20),
+    0 0 0 20px rgba( 30,  64, 175, 0.09),
+    0 0 0 25px rgba( 30,  64, 175, 0.03);
 }
 
 /* The pixel-art canvas — drawn at 40×40, CSS stretches to 280×280.
