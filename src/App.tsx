@@ -138,7 +138,13 @@ export default function App() {
         phase={ballPhase}
         movieTitle={movieTitle}
         movieYear={movieYear}
+        onClick={consultOracle}
       />
+
+      {/* Hint text — only visible in idle state, fades with the ball */}
+      {appPhase === 'idle' && (
+        <p className="ball-hint">tap the oracle</p>
+      )}
 
       {/* ── Small pool warning ── */}
       {tinyPool && appPhase === 'revealed' && (
@@ -155,17 +161,6 @@ export default function App() {
         <p className="oracle-error">
           The oracle finds no films matching your fate.<br />Try different signs.
         </p>
-      )}
-
-      {/* ── Consult button ── */}
-      {appPhase !== 'revealed' && (
-        <button
-          className="oracle-btn"
-          onClick={consultOracle}
-          disabled={isLoading}
-        >
-          {isLoading ? '— consulting —' : '✦ Consult the Oracle ✦'}
-        </button>
       )}
 
       {/* ── Movie reveal card ── */}
