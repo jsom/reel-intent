@@ -22,8 +22,10 @@ function drawGlow(canvas: HTMLCanvasElement, isBlue: boolean) {
   const ctx = canvas.getContext('2d')!
   ctx.clearRect(0, 0, GLOW_S, GLOW_S)
   const cx = GLOW_S / 2, cy = GLOW_S / 2
-  // Ball radius in the 56-wide ball canvas is 27; scale to GLOW_S.
-  const ballR = 27 * (GLOW_S / 56)
+  // Keep ballR at 27 (same as ball canvas) so both canvases share the
+  // same 5× display scale and the rings sit just outside the ball edge.
+  // Scaling it by GLOW_S/56 would push it to ~31, leaving no room.
+  const ballR = 27
   const rgb = isBlue ? '59, 130, 246' : '139, 92, 246'
   // Four 1-canvas-pixel-wide rings = four 5px-wide rings on screen.
   const rings = [
