@@ -284,9 +284,8 @@ export default function EightBall({ phase, movieTitle, movieYear, onClick }: Eig
       className={['ball-scene', isIdle && onClick ? 'ball-clickable' : ''].join(' ')}
       onClick={isIdle ? onClick : undefined}
     >
-      <canvas ref={glowRef} width={GLOW_S} height={GLOW_S} className="ball-glow-canvas" />
-
       <div className={['ball-wrapper', isIdle ? 'ball-floating' : '', isShaking ? 'ball-shaking' : ''].join(' ')}>
+      <canvas ref={glowRef} width={GLOW_S} height={GLOW_S} className="ball-glow-canvas" />
         <div className="ball-face">
           <canvas ref={ballRef} width={S} height={S} className="ball-canvas" />
 
