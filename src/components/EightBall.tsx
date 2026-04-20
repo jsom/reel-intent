@@ -8,10 +8,10 @@ interface EightBallProps {
   movieYear: string
 }
 
-// Canvas is drawn at this size and displayed at 280×280 (7× scale).
-// The 7× upscale with image-rendering: pixelated gives every canvas
-// pixel a 7×7 block on screen — true 8-bit look.
-const S = 40
+// Canvas drawn at this size, displayed at 280×280.
+// 56 → 5× scale (280÷56=5px per canvas pixel).
+// Was 40 → 7× which was too chunky; 56 gives ~25% smaller blocks.
+const S = 56
 
 function fill(ctx: CanvasRenderingContext2D, color: string, cx: number, cy: number, r: number) {
   ctx.fillStyle = color
@@ -20,90 +20,66 @@ function fill(ctx: CanvasRenderingContext2D, color: string, cx: number, cy: numb
   ctx.fill()
 }
 
-// Pixel-art "8" drawn as explicit fillRect blocks so it upscales cleanly
-function drawEight(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
-  const px = 1.5 // 1 "pixel" in canvas units
+// All coordinates are expressed as multiples of `s` (= S/40) so the
+// design scales cleanly if S ever changes.
+function drawEight(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+  const px = 1.5 * s
   ctx.fillStyle = '#090816'
   const x = cx - 2.5 * px
   const y = cy - 3.5 * px
   const p = (dx: number, dy: number) => ctx.fillRect(x + dx * px, y + dy * px, px, px)
-  //  .XXX.
   p(1, 0); p(2, 0); p(3, 0)
-  //  X...X
   p(0, 1); p(4, 1)
-  //  X...X
   p(0, 2); p(4, 2)
-  //  .XXX.
   p(1, 3); p(2, 3); p(3, 3)
-  //  X...X
   p(0, 4); p(4, 4)
-  //  X...X
   p(0, 5); p(4, 5)
-  //  .XXX.
   p(1, 6); p(2, 6); p(3, 6)
 }
 
 function drawFront(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d')!
-  ctx.clearRect(0, 0, S, S)
-  const cx = S / 2, cy = S / 2
+  const s = canvas.width / 40
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  const cx = canvas.width / 2, cy = canvas.height / 2
 
-  // Outermost border ring
-  fill(ctx, '#030208', cx, cy, 19)
-  // Main sphere body (dark purple-black)
-  fill(ctx, '#0c0820', cx, cy, 18)
-  // Bottom-right shadow zone
-  fill(ctx, '#05030e', cx + 3, cy + 3, 15)
-  // Re-fill center to blend
-  fill(ctx, '#0c0820', cx, cy, 11)
-  // Highlight zone 1 (top-left, large)
-  fill(ctx, '#1c1244', cx - 4, cy - 4, 10)
-  // Highlight zone 2
-  fill(ctx, '#3d2478', cx - 6, cy - 6, 7)
-  // Bright highlight
-  fill(ctx, '#6848a8', cx - 8, cy - 8, 4)
-  // Specular spot
-  fill(ctx, '#9870c8', cx - 9, cy - 9, 2)
-  // Darken center back to keep ball moody
-  fill(ctx, '#080610', cx + 1, cy + 2, 8)
-  fill(ctx, '#0c0820', cx, cy, 6)
-
-  // White "8" circle — offset shadow then main
-  fill(ctx, '#c8c8d8', cx + 1, cy + 1, 9)
-  fill(ctx, '#eeeefc', cx, cy, 9)
-
-  drawEight(ctx, cx, cy)
+  fill(ctx, '#030208', cx, cy, 19 * s)
+  fill(ctx, '#0c0820', cx, cy, 18 * s)
+  fill(ctx, '#05030e', cx + 3*s, cy + 3*s, 15 * s)
+  fill(ctx, '#0c0820', cx, cy, 11 * s)
+  fill(ctx, '#1c1244', cx - 4*s, cy - 4*s, 10 * s)
+  fill(ctx, '#3d2478', cx - 6*s, cy - 6*s,  7 * s)
+  fill(ctx, '#6848a8', cx - 8*s, cy - 8*s,  4 * s)
+  fill(ctx, '#9870c8', cx - 9*s, cy - 9*s,  2 * s)
+  fill(ctx, '#080610', cx + 1*s, cy + 2*s,  8 * s)
+  fill(ctx, '#0c0820', cx,       cy,         6 * s)
+  fill(ctx, '#c8c8d8', cx + 1*s, cy + 1*s,  9 * s)
+  fill(ctx, '#eeeefc', cx,       cy,         9 * s)
+  drawEight(ctx, cx, cy, s)
 }
 
 function drawBack(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d')!
-  ctx.clearRect(0, 0, S, S)
-  const cx = S / 2, cy = S / 2
+  const s = canvas.width / 40
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  const cx = canvas.width / 2, cy = canvas.height / 2
 
-  // Border ring
-  fill(ctx, '#010408', cx, cy, 19)
-  // Main sphere body (dark blue-black)
-  fill(ctx, '#060e1c', cx, cy, 18)
-  // Bottom-left shadow (highlight is top-right for the "other side")
-  fill(ctx, '#030810', cx - 3, cy + 3, 15)
-  fill(ctx, '#060e1c', cx, cy, 11)
-  // Highlight zone 1 (top-right, mirrored)
-  fill(ctx, '#0e1e3c', cx + 4, cy - 4, 10)
-  fill(ctx, '#1a3460', cx + 6, cy - 6, 7)
-  fill(ctx, '#2a4e88', cx + 8, cy - 8, 4)
-  fill(ctx, '#3a68a8', cx + 9, cy - 9, 2)
-  // Darken center
-  fill(ctx, '#04090f', cx - 1, cy + 2, 8)
-  fill(ctx, '#060e1c', cx, cy, 6)
-
-  // Answer window
-  fill(ctx, '#030c22', cx, cy, 11)
-  fill(ctx, '#040e28', cx, cy, 10)
-  // Window rim — draw as a ring using stroke
+  fill(ctx, '#010408', cx,       cy,         19 * s)
+  fill(ctx, '#060e1c', cx,       cy,         18 * s)
+  fill(ctx, '#030810', cx - 3*s, cy + 3*s,  15 * s)
+  fill(ctx, '#060e1c', cx,       cy,         11 * s)
+  fill(ctx, '#0e1e3c', cx + 4*s, cy - 4*s,  10 * s)
+  fill(ctx, '#1a3460', cx + 6*s, cy - 6*s,   7 * s)
+  fill(ctx, '#2a4e88', cx + 8*s, cy - 8*s,   4 * s)
+  fill(ctx, '#3a68a8', cx + 9*s, cy - 9*s,   2 * s)
+  fill(ctx, '#04090f', cx - 1*s, cy + 2*s,   8 * s)
+  fill(ctx, '#060e1c', cx,       cy,          6 * s)
+  fill(ctx, '#030c22', cx,       cy,         11 * s)
+  fill(ctx, '#040e28', cx,       cy,         10 * s)
   ctx.strokeStyle = '#1a3a6a'
-  ctx.lineWidth = 0.8
+  ctx.lineWidth = 0.8 * s
   ctx.beginPath()
-  ctx.arc(cx, cy, 10.5, 0, Math.PI * 2)
+  ctx.arc(cx, cy, 10.5 * s, 0, Math.PI * 2)
   ctx.stroke()
 }
 
