@@ -299,6 +299,19 @@
   margin-top: 1.5rem;
 }
 
+/* Hint text below the ball in idle state */
+.ball-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: rgba(168, 85, 247, 0.45);
+  letter-spacing: 0.18em;
+  text-align: center;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+  animation: float-title 5s ease-in-out infinite 0.5s;
+  text-transform: uppercase;
+}
+
 /* ─── Eight Ball ────────────────────────────────────────────── */
 
 .ball-scene {
@@ -306,11 +319,63 @@
   width: 280px;
   height: 280px;
   margin: 0 auto 2rem;
+  position: relative; /* needed for absolute glow child */
+}
+
+/* Square glow element — sits behind the ball-wrapper.
+   Because it has NO border-radius, its box-shadows expand as
+   axis-aligned square rings rather than circular halos.
+   The circular ball is inscribed in this square, so the rings
+   are most visible at the four corners and along the cardinal axes. */
+.ball-pixel-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: box-shadow 0.6s ease;
+}
+
+.glow-purple {
+  box-shadow:
+    0 0 0  5px rgba(139,  92, 246, 0.65),
+    0 0 0 10px rgba(109,  40, 217, 0.38),
+    0 0 0 15px rgba( 91,  33, 182, 0.18),
+    0 0 0 20px rgba( 76,  29, 149, 0.08),
+    0 0 0 25px rgba( 76,  29, 149, 0.02);
+}
+
+.glow-blue {
+  box-shadow:
+    0 0 0  5px rgba( 59, 130, 246, 0.65),
+    0 0 0 10px rgba( 37,  99, 235, 0.38),
+    0 0 0 15px rgba( 29,  78, 216, 0.18),
+    0 0 0 20px rgba( 30,  64, 175, 0.08),
+    0 0 0 25px rgba( 30,  64, 175, 0.02);
 }
 
 .ball-wrapper {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1; /* sits above the square glow */
+}
+
+/* Clickable ball state */
+.ball-clickable {
+  cursor: pointer;
+}
+
+.ball-clickable:hover .glow-purple {
+  box-shadow:
+    0 0 0  5px rgba(192, 132, 252, 0.80),
+    0 0 0 10px rgba(139,  92, 246, 0.50),
+    0 0 0 15px rgba(109,  40, 217, 0.25),
+    0 0 0 20px rgba( 91,  33, 182, 0.10),
+    0 0 0 25px rgba( 76,  29, 149, 0.04);
+}
+
+.ball-clickable:active .ball-wrapper {
+  transform: scale(0.97);
 }
 
 .ball-floating {
@@ -343,26 +408,11 @@
   overflow: hidden; /* clips the upscaled canvas to the circle */
 }
 
-/* Front — pixelated purple glow: discrete 5px rings (= 1 canvas pixel at 5× scale),
-   no blur so they stay hard-edged like a pixel-art sprite aura. */
-.ball-front {
-  box-shadow:
-    0 0 0  5px rgba(139,  92, 246, 0.70),
-    0 0 0 10px rgba(109,  40, 217, 0.42),
-    0 0 0 15px rgba( 91,  33, 182, 0.20),
-    0 0 0 20px rgba( 76,  29, 149, 0.09),
-    0 0 0 25px rgba( 76,  29, 149, 0.03);
-}
+/* Glow is now on .ball-pixel-glow (the square sibling), not the faces. */
+.ball-front {}
 
-/* Back — pixelated blue glow, same approach */
 .ball-back {
   transform: rotateY(180deg);
-  box-shadow:
-    0 0 0  5px rgba( 59, 130, 246, 0.70),
-    0 0 0 10px rgba( 37,  99, 235, 0.42),
-    0 0 0 15px rgba( 29,  78, 216, 0.20),
-    0 0 0 20px rgba( 30,  64, 175, 0.09),
-    0 0 0 25px rgba( 30,  64, 175, 0.03);
 }
 
 /* The pixel-art canvas — drawn at 40×40, CSS stretches to 280×280.

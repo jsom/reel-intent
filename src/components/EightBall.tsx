@@ -6,6 +6,7 @@ interface EightBallProps {
   phase: BallPhase
   movieTitle: string
   movieYear: string
+  onClick?: () => void
 }
 
 // Canvas drawn at this size, displayed at 280×280.
@@ -83,7 +84,7 @@ function drawBack(canvas: HTMLCanvasElement) {
   ctx.stroke()
 }
 
-export default function EightBall({ phase, movieTitle, movieYear }: EightBallProps) {
+export default function EightBall({ phase, movieTitle, movieYear, onClick }: EightBallProps) {
   const frontRef = useRef<HTMLCanvasElement>(null)
   const backRef = useRef<HTMLCanvasElement>(null)
   const [displayedTitle, setDisplayedTitle] = useState('')
@@ -116,13 +117,20 @@ export default function EightBall({ phase, movieTitle, movieYear }: EightBallPro
     return () => clearTimeout(outer)
   }, [phase, movieTitle])
 
-  const isFloating = phase === 'idle'
-  const isShaking = phase === 'shaking'
+  const isIdle    = phase === 'idle'
   const isFlipped = phase === 'flipping' || phase === 'revealed'
 
+  const glowClass = isFlipped ? 'ball-pixel-glow glow-blue' : 'ball-pixel-glow glow-purple'
+
   return (
-    <div className="ball-scene">
-      <div className={['ball-wrapper', isFloating ? 'ball-floating' : '', isShaking ? 'ball-shaking' : ''].join(' ')}>
+    <div
+      className={['ball-scene', isIdle && onClick ? 'ball-clickable' : ''].join(' ')}
+      onClick={isIdle ? onClick : undefined}
+    >
+      {/* Square glow div — no border-radius so box-shadows form X/Y-axis-aligned square rings */}
+      <div className={glowClass} />
+
+      <div className={['ball-wrapper', isIdle ? 'ball-floating' : '', phase === 'shaking' ? 'ball-shaking' : ''].join(' ')}>
         <div className={['ball-body', isFlipped ? 'ball-flipped' : ''].join(' ')}>
 
           {/* Front face — pixel-art sphere with "8" */}
