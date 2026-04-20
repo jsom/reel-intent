@@ -378,33 +378,12 @@
   animation: shake-ball 1.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-.ball-body {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 1.1s cubic-bezier(0.55, 0, 0.45, 1);
-}
-
-.ball-flipped {
-  transform: rotateY(180deg);
-}
-
 /* Both faces share sphere shape */
 .ball-face {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   overflow: hidden; /* clips the upscaled canvas to the circle */
-}
-
-/* Glow is now on .ball-pixel-glow (the square sibling), not the faces. */
-.ball-front {}
-
-.ball-back {
-  transform: rotateY(180deg);
 }
 
 /* The pixel-art canvas — drawn at 40×40, CSS stretches to 280×280.
@@ -420,7 +399,7 @@
   display: block;
 }
 
-/* The blue answer window on the back */
+/* Text overlay for the revealed state — canvas provides the pixelated circle */
 .ball-answer-window {
   position: absolute;
   width: 58%;
@@ -429,14 +408,11 @@
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 45% 40%, #0a1e4a 0%, #030c1e 70%, #010510 100%);
-  border: 1.5px solid rgba(96, 165, 250, 0.3);
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 0 16px rgba(59, 130, 246, 0.4),
-    inset 0 0 24px rgba(0, 0, 0, 0.8);
   overflow: hidden;
 }
 
